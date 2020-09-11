@@ -61,6 +61,9 @@ ONE_BYTE = 0xff
 ONE_BIT = 0x01
 OP_SETS_INST = 0x04
 NUM_OPERANDS = 0x06
+EQ = 1
+GT = 2
+LT = 4
 
 ### Stack ###
 STACK_HEAD = 0xf4
@@ -81,6 +84,7 @@ class CPU:
         self.reg = [0] * 8
         self.reg[SP] = STACK_HEAD
         self.pc = 0
+        self.fl = 0
 
         self.perform_op = {}
         self.perform_op[LDI] = self._ldi
