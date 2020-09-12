@@ -95,6 +95,7 @@ class CPU:
         self.perform_op[POP] = self._pop
         self.perform_op[JMP] = self._jmp
         self.perform_op[JEQ] = self._jeq
+        self.perform_op[JNE] = self._jne
         ### ALU Operations ###
         self.perform_op[MUL] = self._mul
         self.perform_op[CMP] = self._cmp
@@ -171,6 +172,14 @@ class CPU:
         If equal flag is set (true), jump to the address stored in the given register."""
 
         if self.fl & EQ:
+            self.pc = self.reg[operands[0]]
+
+    def _jne(self, *operands):
+        """JNE register
+
+        If E flag is clear (false, 0), jump to the address stored in the given register."""
+
+        if not (self.fl & EQ):
             self.pc = self.reg[operands[0]]
 
     def load(self, program_path):
