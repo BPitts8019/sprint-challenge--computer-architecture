@@ -61,9 +61,10 @@ ONE_BYTE = 0xff
 ONE_BIT = 0x01
 OP_SETS_INST = 0x04
 NUM_OPERANDS = 0x06
-EQ = 1
-GT = 2
-LT = 4
+CMP_CLEAR = 0b11111000
+EQ = 0x01
+GT = 0x02
+LT = 0x04
 
 ### Stack ###
 STACK_HEAD = 0xf4
@@ -90,9 +91,11 @@ class CPU:
         self.perform_op[LDI] = self._ldi
         self.perform_op[PRN] = self._prn
         self.perform_op[HLT] = self._hlt
-        self.perform_op[MUL] = self._mul
         self.perform_op[PUSH] = self._push
         self.perform_op[POP] = self._pop
+        ### ALU Operations ###
+        self.perform_op[MUL] = self._mul
+        self.perform_op[CMP] = self._cmp
 
         self.is_running = False
 
@@ -122,6 +125,15 @@ class CPU:
         Multiply the values in two registers together and store the result in registerA."""
 
         self.alu("MUL", *operands)
+
+    def _cmp(self, *operands):
+        """CMP registerA registerB
+
+        Compare the values in two registers.
+            • If they are equal, set the Equal E flag to 1, otherwise set it to 0.
+            • If registerA is less than registerB, set the Less-than L flag to 1, otherwise set it to 0.
+            • If registerA is greater than registerB, set the Greater-than G flag to 1, otherwise set it to 0."""
+        self.alu("CMP", *operands)
 
     def _pop(self, *operands):
         """POP registerA
@@ -187,6 +199,15 @@ class CPU:
         # elif op == "SUB": etc
         elif op == "MUL":
             self.reg[reg_a] *= self.reg[reg_b] & ONE_BYTE
+        elif op == "CMP":
+            # clear the CMP flag bits
+            self.fl &= CMP_CLEAR
+            if self.reg[reg_a] < self.reg[reg_b]:
+                self.fl |= LT
+            elif self.reg[reg_a] > self.reg[reg_b]:
+                self.fl |= GT
+            else:
+                self.fl |= EQ
         else:
             raise Exception("Unsupported ALU operation")
 
