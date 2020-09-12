@@ -84,8 +84,8 @@ class CPU:
         self.ram = [0] * 256
         self.reg = [0] * 8
         self.reg[SP] = STACK_HEAD
-        self.pc = 0
-        self.fl = 0
+        self.pc = 0x00
+        self.fl = 0x00
 
         self.perform_op = {}
         self.perform_op[LDI] = self._ldi
@@ -94,6 +94,7 @@ class CPU:
         self.perform_op[PUSH] = self._push
         self.perform_op[POP] = self._pop
         self.perform_op[JMP] = self._jmp
+        self.perform_op[JEQ] = self._jeq
         ### ALU Operations ###
         self.perform_op[MUL] = self._mul
         self.perform_op[CMP] = self._cmp
@@ -163,6 +164,14 @@ class CPU:
 
         Jump to the address stored in the given register."""
         self.pc = self.reg[operands[0]]
+
+    def _jeq(self, *operands):
+        """JEQ register
+
+        If equal flag is set (true), jump to the address stored in the given register."""
+
+        if self.fl & EQ:
+            self.pc = self.reg[operands[0]]
 
     def load(self, program_path):
         """Load a program into memory."""
