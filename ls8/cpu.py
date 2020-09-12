@@ -173,6 +173,8 @@ class CPU:
 
         if self.fl & EQ:
             self.pc = self.reg[operands[0]]
+        else:
+            self.pc += 2
 
     def _jne(self, *operands):
         """JNE register
@@ -181,6 +183,8 @@ class CPU:
 
         if not (self.fl & EQ):
             self.pc = self.reg[operands[0]]
+        else:
+            self.pc += 2
 
     def load(self, program_path):
         """Load a program into memory."""
@@ -270,15 +274,12 @@ class CPU:
             instruction_reg = self.ram_read(self.pc)
             op_a = self.ram_read(self.pc + 1)
             op_b = self.ram_read(self.pc + 2)
-            # print("--- Before OP ---")
-            # self.trace()
             if instruction_reg in self.perform_op:
+                # self.trace()
                 self.perform_op[instruction_reg](op_a, op_b)
                 self._to_next_instruction(instruction_reg)
             else:
                 print(f"Unknown Instruction {instruction_reg}")
                 self._shutdown(UNKNOWN_INSTRUCTION)
-            # print("--- After OP ---")
-            # self.trace()
 
         self._shutdown()
