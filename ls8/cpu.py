@@ -93,6 +93,7 @@ class CPU:
         self.perform_op[HLT] = self._hlt
         self.perform_op[PUSH] = self._push
         self.perform_op[POP] = self._pop
+        self.perform_op[JMP] = self._jmp
         ### ALU Operations ###
         self.perform_op[MUL] = self._mul
         self.perform_op[CMP] = self._cmp
@@ -156,6 +157,12 @@ class CPU:
             print(f"Stack Overflow!!")
             self.trace()
             self._shutdown(STACK_OVERFLOW)
+
+    def _jmp(self, *operands):
+        """JMP register
+
+        Jump to the address stored in the given register."""
+        self.pc = self.reg[operands[0]]
 
     def load(self, program_path):
         """Load a program into memory."""
