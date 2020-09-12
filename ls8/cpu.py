@@ -127,7 +127,7 @@ class CPU:
         """ADD registerA registerB
 
         Add the value in two registers and store the result in registerA."""
-        self.alu("MUL", *operands)
+        self.alu("ADD", *operands)
 
     def _mul(self, *operands):
         """MUL registerA registerB
@@ -232,10 +232,12 @@ class CPU:
         """ALU operations."""
 
         if op == "ADD":
-            self.reg[reg_a] += self.reg[reg_b] & ONE_BYTE
+            self.reg[reg_a] += self.reg[reg_b]
+            self.reg[reg_a] &= ONE_BYTE
         # elif op == "SUB": etc
         elif op == "MUL":
-            self.reg[reg_a] *= self.reg[reg_b] & ONE_BYTE
+            self.reg[reg_a] *= self.reg[reg_b]
+            self.reg[reg_a] &= ONE_BYTE
         elif op == "CMP":
             # clear the CMP flag bits
             self.fl &= CMP_CLEAR
