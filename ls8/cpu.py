@@ -105,6 +105,7 @@ class CPU:
         self.perform_op[XOR] = self._xor
         self.perform_op[NOT] = self._not
         self.perform_op[SHL] = self._shl
+        self.perform_op[SHR] = self._shr
         self.is_running = False
 
     def _ldi(self, *operands):
@@ -177,6 +178,12 @@ class CPU:
 
         Shift the value in registerA left by the number of bits specified in registerB, filling the low bits with 0."""
         self.alu("SHL", *operands)
+
+    def _shr(self, *operands):
+        """SHR registerA registerB
+
+        Shift the value in registerA right by the number of bits specified in registerB, filling the high bits with 0."""
+        self.alu("SHR", *operands)
 
     def _pop(self, *operands):
         """POP registerA
@@ -283,6 +290,8 @@ class CPU:
             self.reg[reg_a] = ~self.reg[reg_a]
         elif op == "SHL":
             self.reg[reg_a] = self.reg[reg_a] << self.reg[reg_b]
+        elif op == "SHR":
+            self.reg[reg_a] = self.reg[reg_a] >> self.reg[reg_b]
         else:
             raise Exception("Unsupported ALU operation")
 
