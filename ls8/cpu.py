@@ -97,9 +97,10 @@ class CPU:
         self.perform_op[JEQ] = self._jeq
         self.perform_op[JNE] = self._jne
         ### ALU Operations ###
+        self.perform_op[ADD] = self._add
         self.perform_op[MUL] = self._mul
         self.perform_op[CMP] = self._cmp
-
+        self.perform_op[AND] = self._and
         self.is_running = False
 
     def _ldi(self, *operands):
@@ -122,11 +123,16 @@ class CPU:
 
         self.is_running = False
 
+    def _add(self, *operands):
+        """ADD registerA registerB
+
+        Add the value in two registers and store the result in registerA."""
+        self.alu("MUL", *operands)
+
     def _mul(self, *operands):
         """MUL registerA registerB
 
         Multiply the values in two registers together and store the result in registerA."""
-
         self.alu("MUL", *operands)
 
     def _cmp(self, *operands):
@@ -138,11 +144,16 @@ class CPU:
             • If registerA is greater than registerB, set the Greater-than G flag to 1, otherwise set it to 0."""
         self.alu("CMP", *operands)
 
+    def _and(self, *operands):
+        """AND registerA registerB
+
+        Bitwise-AND the values in registerA and registerB, then store the result in registerA."""
+        self.alu("AND", *operands)
+
     def _pop(self, *operands):
         """POP registerA
 
         Pop the value at the top of the stack into the given register."""
-
         self.reg[operands[0]] = self.ram_read(self.reg[SP])
         if self.reg[SP] < STACK_HEAD:
             self.reg[SP] += 1
@@ -151,7 +162,6 @@ class CPU:
         """PUSH registerA
 
         Push the value in the given register on the stack."""
-
         if (self.reg[SP]-1) >= self.reg[PROGRAM_END]:
             self.reg[SP] -= 1
             self.ram_write(self.reg[SP], self.reg[operands[0]])
@@ -170,7 +180,6 @@ class CPU:
         """JEQ register
 
         If equal flag is set (true), jump to the address stored in the given register."""
-
         if self.fl & EQ:
             self.pc = self.reg[operands[0]]
         else:
@@ -180,7 +189,6 @@ class CPU:
         """JNE register
 
         If E flag is clear (false, 0), jump to the address stored in the given register."""
-
         if not (self.fl & EQ):
             self.pc = self.reg[operands[0]]
         else:
@@ -237,6 +245,8 @@ class CPU:
                 self.fl |= GT
             else:
                 self.fl |= EQ
+        elif op == "AND":
+            self.reg[reg_a] &= self.reg[reg_b]
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -245,7 +255,6 @@ class CPU:
         Handy function to print out the CPU state. You might want to call this
         from run() if you need help debugging.
         """
-
         print(f"TRACE: %02X | %02X %02X %02X |" % (
             self.pc,
             # self.fl,
@@ -275,7 +284,7 @@ class CPU:
             op_a = self.ram_read(self.pc + 1)
             op_b = self.ram_read(self.pc + 2)
             if instruction_reg in self.perform_op:
-                # self.trace()
+                self.trace()
                 self.perform_op[instruction_reg](op_a, op_b)
                 self._to_next_instruction(instruction_reg)
             else:
