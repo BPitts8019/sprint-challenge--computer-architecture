@@ -101,6 +101,10 @@ class CPU:
         self.perform_op[MUL] = self._mul
         self.perform_op[CMP] = self._cmp
         self.perform_op[AND] = self._and
+        self.perform_op[OR] = self._or
+        self.perform_op[XOR] = self._xor
+        self.perform_op[NOT] = self._not
+        self.perform_op[SHL] = self._shl
         self.is_running = False
 
     def _ldi(self, *operands):
@@ -149,6 +153,30 @@ class CPU:
 
         Bitwise-AND the values in registerA and registerB, then store the result in registerA."""
         self.alu("AND", *operands)
+
+    def _or(self, *operands):
+        """OR registerA registerB
+
+        Perform a bitwise-OR between the values in registerA and registerB, storing the result in registerA."""
+        self.alu("OR", *operands)
+
+    def _xor(self, *operands):
+        """XOR registerA registerB
+
+        Perform a bitwise-XOR between the values in registerA and registerB, storing the result in registerA."""
+        self.alu("XOR", *operands)
+
+    def _not(self, *operands):
+        """NOT register`
+
+        Perform a bitwise-NOT on the value in a register, storing the result in the register."""
+        self.alu("NOT", *operands)
+
+    def _shl(self, *operands):
+        """SHL registerA registerB
+
+        Shift the value in registerA left by the number of bits specified in registerB, filling the low bits with 0."""
+        self.alu("SHL", *operands)
 
     def _pop(self, *operands):
         """POP registerA
@@ -233,11 +261,9 @@ class CPU:
 
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
-            self.reg[reg_a] &= ONE_BYTE
         # elif op == "SUB": etc
         elif op == "MUL":
             self.reg[reg_a] *= self.reg[reg_b]
-            self.reg[reg_a] &= ONE_BYTE
         elif op == "CMP":
             # clear the CMP flag bits
             self.fl &= CMP_CLEAR
@@ -249,8 +275,19 @@ class CPU:
                 self.fl |= EQ
         elif op == "AND":
             self.reg[reg_a] &= self.reg[reg_b]
+        elif op == "OR":
+            self.reg[reg_a] |= self.reg[reg_b]
+        elif op == "XOR":
+            self.reg[reg_a] ^= self.reg[reg_b]
+        elif op == "NOT":
+            self.reg[reg_a] = ~self.reg[reg_a]
+        elif op == "SHL":
+            self.reg[reg_a] = self.reg[reg_a] << self.reg[reg_b]
         else:
             raise Exception("Unsupported ALU operation")
+
+        # Clamp results to one byte
+        self.reg[reg_a] &= ONE_BYTE
 
     def trace(self):
         """
